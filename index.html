@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Melon Dev • Lua Raw Generator</title>
+<link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="container">
+<div class="brand">
+<div class="logo">🍈</div>
+<div class="brand-text">
+<h1>Melon Dev</h1>
+<p class="subtitle">Protected Lua Raw Generator • Vercel Ready</p>
+</div>
+</div>
+<textarea id="luaInput" placeholder="วางโค้ด Lua ที่นี่..."></textarea>
+<div class="btn-group">
+<button onclick="generate()">สร้างลิงก์</button>
+<button class="secondary" onclick="clearAll()">ล้าง</button>
+</div>
+<div class="result hidden" id="result">
+<div class="section">
+<label>loadstring (คัดลอกไปใช้ใน executor)</label>
+<div class="output-box">
+<code id="loadstringOut"></code>
+<button class="copy-btn" onclick="copyText('loadstringOut')">คัดลอก</button>
+</div>
+</div>
+<div class="section">
+<label>Raw Link (ใช้กับ HttpGet โดยตรง)</label>
+<div class="output-box">
+<code id="rawOut"></code>
+<button class="copy-btn" onclick="copyText('rawOut')">คัดลอก</button>
+</div>
+</div>
+</div>
+<footer>
+<span>Melon Dev</span> • Auto Domain • No Blob Store
+    </footer>
+</div>
+<script>
+    const BASE_URL = window.location.origin;
+
+    // ห่อโค้ด Lua ด้วย Loading UI สวย ๆ (โหลดถึง 100% แล้วรันสคริปต์จริง)
+    function wrapWithLoadingUI(userLua) {
+      // หนีอักขระพิเศษสำหรับ long string ของ Lua
+      // ใช้ level ที่ไม่ชนกับเนื้อหา
+      let eq = '';
+      while (userLua.includes(']' + eq + ']')) {
+        eq += '=';
+      }
+      const open = '[' + eq + '[';
+      const close = ']' + eq + ']';
+
+      return `--[[ BOss Premium Loader ]]
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- ลบของเก่า
+local old = playerGui:FindFirstChild("BOssLoader")
+if old then old:Destroy() end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "BOssLoader"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = playerGui
+
+-- ===== พื้นหลัง =====
+local bg = Instance.new("Frame")
+bg.Size = UDim2.fromScale(1, 1)
+bg.BackgroundColor3 = Color3.fromRGB(6, 18, 12)
+bg.BorderSizePixel = 0
+bg.Parent = gui
+
+local bgGrad = Instance.new("UIGradient")
+bgGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0.00, Color3.fromRGB(8, 28, 16)),
+	ColorSequenceKeypoint.new(0.45, Color3.fromRGB(14, 48, 28)),
+	ColorSequenceKeypoint.new(1.00, Color3.fromRGB(6, 20, 12))
+})
+bgGrad.Rotation = 125
+bgGrad.Parent = bg
+
+-- วงกลม glow ด้านหลังการ์ด
+local glow = Instance.new("Frame")
+glow.Size = UDim2.fromOffset(420, 420)
+glow.Position = UDim2.fromScale(0.5, 0.5)
+glow.AnchorPoint = Vector2.new(0.5, 0.5)
+glow.BackgroundColor3 = Color3.fromRGB(40, 180, 90)
+glow.BackgroundTransparency = 0.88
+glow.BorderSizePixel = 0
+glow.Parent = gui
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(1, 0)
+glowCorner.Parent = glow
+
+-- ===== การ์ดหลัก =====
+local card = Instance.new("Frame")
+card.Size = UDim2.fromOffset(340, 380)
+card.Position = UDim2.fromScale(0.5, 0.5)
+card.AnchorPoint = Vector2.new(0.5, 0.5)
+card.BackgroundColor3 = Color3.fromRGB(12, 38, 24)
+card.BorderSizePixel = 0
+card.Parent = gui
+
+local cardCorner = Instance.new("UICorner")
+cardCorner.CornerRadius = UDim.new(0, 22)
+cardCorner.Parent = card
+
+local cardStroke = Instance.new("UIStroke")
+cardStroke.Color = Color3.fromRGB(70, 210, 120)
+cardStroke.Thickness = 1.8
+cardStroke.Transparency = 0.35
+cardStroke.Parent = card
+
+local cardGrad = Instance.new("UIGradient")
+cardGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 55, 34)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 32, 20))
+})
+cardGrad.Rotation = 160
+cardGrad.Parent = card
+
+-- เงาอ่อนด้านในด้านบน
+local topShine = Instance.new("Frame")
+topShine.Size = UDim2.new(1, 0, 0, 80)
+topShine.BackgroundColor3 = Color3.fromRGB(120, 255, 170)
+topShine.BackgroundTransparency = 0.92
+topShine.BorderSizePixel = 0
+topShine.Parent = card
+
+local topShineCorner = Instance.new("UICorner")
+topShineCorner.CornerRadius = UDim.new(0, 22)
+topShineCorner.Parent = topShine
+
+-- ===== โลโก้ =====
+local logoWrap = Instance.new("Frame")
+logoWrap.Size = UDim2.fromOffset(110, 110)
+logoWrap.Position = UDim2.new(0.5, 0, 0, 32)
+logoWrap.AnchorPoint = Vector2.new(0.5, 0)
+logoWrap.BackgroundColor3 = Color3.fromRGB(16, 50, 30)
+logoWrap.BorderSizePixel = 0
+logoWrap.Parent = card
+
+local logoWrapCorner = Instance.new("UICorner")
+logoWrapCorner.CornerRadius = UDim.new(0, 20)
+logoWrapCorner.Parent = logoWrap
+
+local logoStroke = Instance.new("UIStroke")
+logoStroke.Color = Color3.fromRGB(90, 230, 140)
+logoStroke.Thickness = 1.5
+logoStroke.Transparency = 0.4
+logoStroke.Parent = logoWrap
+
+local logo = Instance.new("ImageLabel")
+logo.Size = UDim2.fromOffset(88, 88)
+logo.Position = UDim2.fromScale(0.5, 0.5)
+logo.AnchorPoint = Vector2.new(0.5, 0.5)
+logo.BackgroundTransparency = 1
+logo.Image = "rbxassetid://115850456374756"
+logo.ScaleType = Enum.ScaleType.Fit
+logo.Parent = logoWrap
+
+-- ===== หัวข้อ =====
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -24, 0, 34)
+title.Position = UDim2.new(0.5, 0, 0, 155)
+title.AnchorPoint = Vector2.new(0.5, 0)
+title.BackgroundTransparency = 1
+title.Text = "BOss Loader"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 28
+title.TextColor3 = Color3.fromRGB(150, 255, 190)
+title.Parent = card
+
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1, -24, 0, 20)
+subtitle.Position = UDim2.new(0.5, 0, 0, 188)
+subtitle.AnchorPoint = Vector2.new(0.5, 0)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "กำลังเตรียมสคริปต์..."
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextSize = 14
+subtitle.TextColor3 = Color3.fromRGB(130, 200, 155)
+subtitle.Parent = card
+
+-- ===== เปอร์เซ็นต์ =====
+local percentLabel = Instance.new("TextLabel")
+percentLabel.Size = UDim2.new(1, -24, 0, 28)
+percentLabel.Position = UDim2.new(0.5, 0, 0, 225)
+percentLabel.AnchorPoint = Vector2.new(0.5, 0)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Text = "0%"
+percentLabel.Font = Enum.Font.GothamBold
+percentLabel.TextSize = 22
+percentLabel.TextColor3 = Color3.fromRGB(100, 240, 150)
+percentLabel.Parent = card
+
+-- ===== แถบโหลด =====
+local barBg = Instance.new("Frame")
+barBg.Size = UDim2.fromOffset(250, 12)
+barBg.Position = UDim2.new(0.5, 0, 0, 265)
+barBg.AnchorPoint = Vector2.new(0.5, 0)
+barBg.BackgroundColor3 = Color3.fromRGB(8, 28, 16)
+barBg.BorderSizePixel = 0
+barBg.Parent = card
+
+local barBgCorner = Instance.new("UICorner")
+barBgCorner.CornerRadius = UDim.new(1, 0)
+barBgCorner.Parent = barBg
+
+local barBgStroke = Instance.new("UIStroke")
+barBgStroke.Color = Color3.fromRGB(40, 100, 60)
+barBgStroke.Thickness = 1
+barBgStroke.Transparency = 0.5
+barBgStroke.Parent = barBg
+
+local bar = Instance.new("Frame")
+bar.Size = UDim2.new(0, 0, 1, 0)
+bar.BackgroundColor3 = Color3.fromRGB(70, 230, 130)
+bar.BorderSizePixel = 0
+bar.Parent = barBg
+
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(1, 0)
+barCorner.Parent = bar
+
+local barGrad = Instance.new("UIGradient")
+barGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 200, 110)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(120, 255, 170)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 220, 130))
+})
+barGrad.Parent = bar
+
+-- ข้อความสถานะด้านล่าง
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1, -24, 0, 18)
+status.Position = UDim2.new(0.5, 0, 0, 290)
+status.AnchorPoint = Vector2.new(0.5, 0)
+status.BackgroundTransparency = 1
+status.Text = "Initializing..."
+status.Font = Enum.Font.Gotham
+status.TextSize = 13
+status.TextColor3 = Color3.fromRGB(100, 170, 125)
+status.Parent = card
+
+-- ===== อนิเมชันโหลด 0 → 100% =====
+local duration = 2.4
+local startTime = os.clock()
+local conn
+local finished = false
+
+local statusTexts = {
+	{0, "Initializing..."},
+	{15, "Connecting..."},
+	{35, "Downloading modules..."},
+	{55, "Decrypting..."},
+	{75, "Preparing environment..."},
+	{90, "Almost ready..."},
+	{100, "Complete!"}
+}
+
+conn = RunService.RenderStepped:Connect(function()
+	if finished then return end
+	local alpha = math.clamp((os.clock() - startTime) / duration, 0, 1)
+	-- ease out cubic
+	local t = 1 - (1 - alpha) ^ 3
+	local pct = math.floor(t * 100 + 0.5)
+
+	bar.Size = UDim2.new(t, 0, 1, 0)
+	percentLabel.Text = pct .. "%"
+
+	for i = #statusTexts, 1, -1 do
+		if pct >= statusTexts[i][1] then
+			status.Text = statusTexts[i][2]
+			break
+		end
+	end
+
+	if alpha >= 1 then
+		finished = true
+		conn:Disconnect()
+		percentLabel.Text = "100%"
+		status.Text = "Complete!"
+		subtitle.Text = "กำลังรันสคริปต์..."
+
+		task.wait(0.35)
+
+		-- เฟดออก
+		local fadeInfo = TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		for _, v in ipairs(gui:GetDescendants()) do
+			if v:IsA("TextLabel") or v:IsA("TextButton") then
+				TweenService:Create(v, fadeInfo, {TextTransparency = 1}):Play()
+			elseif v:IsA("ImageLabel") then
+				TweenService:Create(v, fadeInfo, {ImageTransparency = 1}):Play()
+			elseif v:IsA("Frame") or v:IsA("ScrollingFrame") then
+				TweenService:Create(v, fadeInfo, {BackgroundTransparency = 1}):Play()
+			elseif v:IsA("UIStroke") then
+				TweenService:Create(v, fadeInfo, {Transparency = 1}):Play()
+			end
+		end
+		TweenService:Create(bg, fadeInfo, {BackgroundTransparency = 1}):Play()
+
+		task.wait(0.5)
+		gui:Destroy()
+
+		-- ===== รันสคริปต์จริง (ปลอดภัยด้วย loadstring + long string) =====
+		local src = ${open}
+${userLua}
+${close}
+		local fn, err = loadstring(src)
+		if fn then
+			local ok, runErr = pcall(fn)
+			if not ok then
+				warn("[Melon Dev] Runtime error:", runErr)
+			end
+		else
+			warn("[Melon Dev] Compile error:", err)
+		end
+	end
+end)
+`;
+    }
+
+    function generate() {
+      const lua = document.getElementById('luaInput').value.trim();
+      if (!lua) {
+        alert('กรุณาใส่โค้ด Lua ก่อน');
+        return;
+      }
+
+      const wrapped = wrapWithLoadingUI(lua);
+      const base64 = btoa(unescape(encodeURIComponent(wrapped)));
+
+      const rawUrl = `${BASE_URL}/api/raw?data=${encodeURIComponent(base64)}`;
+      const loadstring = `loadstring(game:HttpGet("${rawUrl}"))()`;
+
+      document.getElementById('loadstringOut').textContent = loadstring;
+      document.getElementById('rawOut').textContent = rawUrl;
+      document.getElementById('result').classList.remove('hidden');
+    }
+
+    function clearAll() {
+      document.getElementById('luaInput').value = '';
+      document.getElementById('result').classList.add('hidden');
+    }
+
+    function copyText(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('คัดลอกแล้ว');
+      });
+    }
+  </script>
+</body>
+</html>
